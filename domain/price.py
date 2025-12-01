@@ -1,6 +1,12 @@
 import dataclasses
 import decimal
 import enum
+from typing import Any, Awaitable, Coroutine, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .price_db_repository import CryptoPriceRepository
+    from .price_sourcing_repository import CryptoPriceSourcingRepository
+
 
 class CryptoPriceMovementDirection(enum.StrEnum):
     DOWN = 'down'
@@ -9,6 +15,7 @@ class CryptoPriceMovementDirection(enum.StrEnum):
 
 @dataclasses.dataclass
 class CryptoPrice:
+    ticker: str
     target: decimal.Decimal
     movement_direction: CryptoPriceMovementDirection
     id: int | None = None
@@ -16,3 +23,13 @@ class CryptoPrice:
     current:decimal.Decimal | None = None
     is_active: bool = True
     is_fired: bool = False
+
+
+    async def save_in_db(self, db_repository: 'CryptoPriceRepository', ) -> Awaitable['CryptoPrice']:
+        return await db_repository.add(self)
+
+    async def fetch_current_value(
+            self,
+            sourcing_repository: 'CryptoPriceSourcingRepository',
+    ) -> Awaitable['CryptoPrice']:
+        return await sourcing_repository.fetch(self)
