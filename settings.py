@@ -1,8 +1,7 @@
 import dataclasses
-import importlib
 import uuid
-from functools import cache
-from typing import Any, Type, TypeVar, Generic
+
+from utils.singletone import ModuleSingletonAssigner
 
 __all__ = (
     'settings',
@@ -15,29 +14,4 @@ class ProjectSettings:
 
 
 settings: ProjectSettings
-
-T = TypeVar('T')
-
-class ModuleSingletonAssigner(Generic[T]):
-    def __init__(self, obj: Type[T], attr_name: str) -> None:
-        self.obj = obj
-        self.attr_name = attr_name
-
-    @cache
-    def _build_obj(self) -> T:
-        return self.obj()
-
-    def _module_level_getattr(self, name: str) -> T | Any:
-        if name == self.attr_name:
-            return self._build_obj()
-        elif name in __all__:
-            import importlib
-            return importlib.import_module('.' + name, __name__)
-        else:
-            raise AttributeError(f'module {__name__!r} has no attribute {name!r}')
-
-    def assign(self) -> None:
-        mod = importlib.import_module('settings')
-        mod.__getattr__ = self._module_level_getattr
-
 ModuleSingletonAssigner(ProjectSettings, 'settings').assign()
