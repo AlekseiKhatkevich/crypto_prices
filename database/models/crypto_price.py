@@ -16,7 +16,6 @@ class CryptoPriceORM(ORMBase):
     __tablename__ = 'cryptoprice'
 
     id: Mapped[int] = mapped_column(
-        Identity(always=True),
         primary_key=True,
         comment='id.',
         nullable=False,
@@ -60,7 +59,8 @@ class CryptoPriceORM(ORMBase):
         Index(
             'name_target_uq',
             'ticker', 'target',
-            sqlite_where='is_active = True',
+            unique=True,
+            sqlite_where=text('is_active = True'),
         ),
         CheckConstraint(text('target > 0'), name='target_gt_0_check', ),
         CheckConstraint(text('last_saved > 0'), name='last_saved_gt_0_check', ),
