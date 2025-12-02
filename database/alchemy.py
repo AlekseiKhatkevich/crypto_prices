@@ -1,11 +1,7 @@
 from contextlib import aclosing, asynccontextmanager
 from typing import AsyncGenerator
-from settings import settings
-import uuid
 
 import pydantic_core
-from sqlalchemy import text
-from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import (
     AsyncConnection,
     AsyncEngine,
@@ -13,6 +9,8 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
+
+from settings import settings
 from utils.singletone import ModuleSingletonAssigner
 
 
@@ -46,10 +44,6 @@ class Database:
                 pool_pre_ping=True,
                 pool_timeout=5,
                 pool_size=5,
-                # connect_args={
-                #     'prepared_statement_name_func': lambda: f'__asyncpg_{uuid.uuid4()}__',
-                #     'autocommit': False,
-                # },
             ) | self._kwargs,
         )
         return engine
@@ -71,3 +65,4 @@ class Database:
 
 db: Database
 ModuleSingletonAssigner(Database, 'db').assign()
+

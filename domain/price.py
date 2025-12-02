@@ -1,7 +1,7 @@
 import dataclasses
 import decimal
 import enum
-from typing import Any, Awaitable, Coroutine, TYPE_CHECKING
+from typing import Awaitable, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .price_db_repository import CryptoPriceRepository
@@ -22,7 +22,7 @@ class CryptoPrice:
     last_saved: decimal.Decimal | None = None
     current:decimal.Decimal | None = None
     is_active: bool = True
-    is_fired: bool = False
+    # is_fired: bool = False
 
 
     async def save_in_db(self, db_repository: 'CryptoPriceRepository', ) -> Awaitable['CryptoPrice']:
