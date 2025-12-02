@@ -1,7 +1,7 @@
 import datetime
 import decimal
 
-from sqlalchemy import CheckConstraint, FetchedValue, Identity, Index, func, text, true
+from sqlalchemy import CheckConstraint, FetchedValue, Index, func, text, true
 from sqlalchemy.orm import Mapped, mapped_column
 
 from database.models.base import ORMBase

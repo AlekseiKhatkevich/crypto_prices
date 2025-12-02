@@ -3,12 +3,14 @@ import decimal
 import enum
 from typing import Awaitable, TYPE_CHECKING
 
+from utils.enums import CaseInsensitiveMixin
+
 if TYPE_CHECKING:
     from .price_db_repository import CryptoPriceRepository
     from .price_sourcing_repository import CryptoPriceSourcingRepository
 
 
-class CryptoPriceMovementDirection(enum.StrEnum):
+class CryptoPriceMovementDirection(CaseInsensitiveMixin, enum.StrEnum):
     DOWN = 'down'
     UP = 'up'
 

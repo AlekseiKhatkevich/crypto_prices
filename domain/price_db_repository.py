@@ -12,5 +12,5 @@ class CryptoPriceRepository(abc.ABC):
         pass
 
     @abc.abstractmethod
-    async def all(self) -> Awaitable[tuple['CryptoPrice', ...] ]:
+    async def all(self) -> Awaitable[list['CryptoPrice'] ]:
         pass
