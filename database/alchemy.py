@@ -51,7 +51,7 @@ class Database:
     @property
     def async_sessionmaker(self) -> async_sessionmaker:
         if self._maker is None:
-            self._maker = async_sessionmaker(self.engine, kw=self._sessionmaker_kwargs)
+            self._maker = async_sessionmaker(self.engine, **self._sessionmaker_kwargs)
         if self.connection is not None:
             self._maker.configure(bind=self.connection)
         return self._maker

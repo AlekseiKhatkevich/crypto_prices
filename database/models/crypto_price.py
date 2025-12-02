@@ -2,8 +2,9 @@ import datetime
 import decimal
 
 from sqlalchemy import CheckConstraint, FetchedValue, Identity, Index, func, text, true
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column
 
+from database.models.base import ORMBase
 from domain.price import CryptoPriceMovementDirection
 
 __all__ = (
@@ -11,7 +12,7 @@ __all__ = (
 )
 
 
-class CryptoPriceORM(DeclarativeBase):
+class CryptoPriceORM(ORMBase):
     __tablename__ = 'cryptoprice'
 
     id: Mapped[int] = mapped_column(

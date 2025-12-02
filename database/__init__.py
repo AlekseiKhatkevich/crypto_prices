@@ -1,1 +1,1 @@
-from models import *  # ty: ignore[unresolved-import]
+from .models import *  # ty: ignore[unresolved-import]
