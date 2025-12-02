@@ -1,5 +1,7 @@
 from contextlib import aclosing, asynccontextmanager
 from typing import AsyncGenerator
+from settings import settings
+import uuid
 
 import pydantic_core
 from sqlalchemy import text
@@ -11,6 +13,7 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
+from utils.singletone import ModuleSingletonAssigner
 
 
 class Database:
@@ -33,9 +36,9 @@ class Database:
     def engine(self) -> AsyncEngine:
         engine = create_async_engine(
             **dict(
-                url=settings.POSTGRES_DSN.unicode_string(),
+                url=settings.db_addr,
                 execution_options={},
-                insertmanyvalues_page_size=2000,
+                insertmanyvalues_page_size=100,
                 json_deserializer=pydantic_core.from_json,
                 json_serializer=pydantic_core.to_json,
                 echo=True,
@@ -43,10 +46,10 @@ class Database:
                 pool_pre_ping=True,
                 pool_timeout=5,
                 pool_size=5,
-                connect_args={
-                    'prepared_statement_name_func': lambda: f'__asyncpg_{ulid.ULID()}__',
-                    'autocommit': False,
-                },
+                # connect_args={
+                #     'prepared_statement_name_func': lambda: f'__asyncpg_{uuid.uuid4()}__',
+                #     'autocommit': False,
+                # },
             ) | self._kwargs,
         )
         return engine
@@ -61,17 +64,10 @@ class Database:
 
     @property
     @asynccontextmanager
-    async def async_session(self) -> AsyncGenerator[AsyncSession]:
+    async def async_session(self) -> AsyncGenerator[AsyncSession, None]:
         async with aclosing(self.async_sessionmaker()) as async_session:
                 yield async_session
 
-    async def check_health(self) -> bool:
-        try:
-            async with self.async_session as session:
-                await session.execute(text('SELECT 1'))
-            return True
-        except (SQLAlchemyError, OSError) as e:
-            print(f'Database health check failed: {e}')
-            return False
 
-db = Database()
+db: Database
+ModuleSingletonAssigner(Database, 'db').assign()
