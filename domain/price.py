@@ -22,7 +22,6 @@ class CryptoPrice:
     last_saved: decimal.Decimal | None = None
     current:decimal.Decimal | None = None
     is_active: bool = True
-    # is_fired: bool = False
 
 
     async def save_in_db(self, db_repository: 'CryptoPriceRepository', ) -> Awaitable['CryptoPrice']:

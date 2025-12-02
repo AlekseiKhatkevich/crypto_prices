@@ -16,5 +16,5 @@ dev = [
     "ty>=0.0.1a29",
 ]
 
-
-[tool.ty.rules]
+[tool.ty.src]
+exclude = ["./.venv", "./venv", "**/.venv/", ".venv/lib/pypy3.11"]

@@ -1,7 +1,7 @@
 import datetime
 import decimal
 
-from sqlalchemy import FetchedValue, Identity, Index, func, true
+from sqlalchemy import CheckConstraint, FetchedValue, Identity, Index, func, text, true
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 from domain.price import CryptoPriceMovementDirection
@@ -9,8 +9,6 @@ from domain.price import CryptoPriceMovementDirection
 __all__ = (
     'CryptoPriceORM',
 )
-
-
 
 
 class CryptoPriceORM(DeclarativeBase):
@@ -63,6 +61,8 @@ class CryptoPriceORM(DeclarativeBase):
             'ticker', 'target',
             sqlite_where='is_active = True',
         ),
+        CheckConstraint(text('target > 0'), name='target_gt_0_check', ),
+        CheckConstraint(text('last_saved > 0'), name='last_saved_gt_0_check', ),
     )
 
     def __repr__(self):
