@@ -33,7 +33,7 @@ class HTTPCryptoPriceSourcingRepository(Finalizable, CryptoPriceSourcingReposito
 
     @staticmethod
     async def raise_on_4xx_5xx(response) -> None:
-        await response.raise_for_status()
+        response.raise_for_status()
 
     async def fetch(self, price):
         response = await self.client.get(
