@@ -18,6 +18,7 @@ class CryptoPriceMovementDirection(CaseInsensitiveMixin, enum.StrEnum):
 @dataclasses.dataclass
 class CryptoPrice:
     ticker: str
+    standard_name: str
     target: decimal.Decimal
     movement_direction: CryptoPriceMovementDirection
     id: int | None = None
