@@ -5,7 +5,7 @@ from sqlalchemy import CheckConstraint, FetchedValue, Index, func, text, true
 from sqlalchemy.orm import Mapped, mapped_column
 
 from database.models.base import ORMBase
-from domain.price import CryptoPriceMovementDirection
+from domain.price import CryptoPrice, CryptoPriceMovementDirection
 
 __all__ = (
     'CryptoPriceORM',
@@ -68,3 +68,16 @@ class CryptoPriceORM(ORMBase):
 
     def __repr__(self):
         return f'{self.target} for {self.ticker}'
+
+    @staticmethod
+    def to_dto(price: 'CryptoPriceORM') -> CryptoPrice:
+        return CryptoPrice(
+            id=price.id,
+            standard_name=price.standard_name,
+            target=price.target,
+            movement_direction=price.movement_direction,
+            last_saved=price.last_saved,
+            current=None,
+            is_active=price.is_active,
+            ticker=price.ticker,
+        )

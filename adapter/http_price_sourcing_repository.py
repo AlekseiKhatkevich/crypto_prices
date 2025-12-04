@@ -26,6 +26,7 @@ class HTTPCryptoPriceSourcingRepository(Finalizable, CryptoPriceSourcingReposito
     def __init__(self, base_url: str = settings.api_base_url) -> None:
         self.base_url = base_url
         self.client = httpx.AsyncClient(
+            http2=True,
             limits=httpx.Limits(max_connections=5),
             event_hooks={'response': [self.raise_on_4xx_5xx]},
             transport=httpx.AsyncHTTPTransport(retries=2),
