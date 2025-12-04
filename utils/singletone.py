@@ -1,8 +1,11 @@
+import asyncio
 import importlib
 import inspect
+import weakref
 from functools import cache
-from typing import Any, Generic, Type, TypeVar
-from typing import no_type_check
+from typing import Any, Generic, Type, TypeVar, no_type_check
+
+from utils.weakref import Finalizable
 
 __all__ = (
     'ModuleSingletonAssigner',
@@ -17,7 +20,10 @@ class ModuleSingletonAssigner(Generic[T]):
 
     @cache
     def _build_obj(self) -> T:
-        return self.obj()
+        built_obj = self.obj()
+        if isinstance(built_obj, Finalizable):
+            weakref.finalize(built_obj, lambda: asyncio.run(built_obj._finalize()))
+        return built_obj
 
     def _module_level_getattr(self, name: str) -> T | Any:
         if name == self.attr_name:
