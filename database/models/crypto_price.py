@@ -89,7 +89,7 @@ class CryptoPriceORM(ORMBase):
             standard_name=price.standard_name,
             target=price.target,
             movement_direction=price.movement_direction,
-            last_saved=price.last_saved,
+            last_saved=price.current,
             is_active=price.is_active,
             ticker=price.ticker,
             updated_at=func.NOW(),
