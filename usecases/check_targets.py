@@ -31,19 +31,29 @@ class CheckTargetsUseCase:
             # await self.telegram_queue.put(price)
 
 
-    async def fetch_web_data_consumer(self, id):
+    async def _get_price_from_queue(self, queue, prev_event, next_event, id):
         while True:
             try:
-                price = await self.fetch_queue.get() if not self.main_end_event.is_set() else self.fetch_queue.get_nowait()
-                print(f'{id=}, fetch_web_data_consumer::Got price {price}')
-                await self.update_price(price)
-                await self.check_trigger(price)
-                # await self.save_db_queue.put(price)
-                self.fetch_queue.task_done()
-            except (asyncio.CancelledError, asyncio.queues.QueueEmpty) as exc:
-                print(f'{id=}, fetch_web_data_consumer:: Exiting, reason - {exc}')
-                self.fetch_end_event.set()
+                if not prev_event.is_set():
+                    price = await asyncio.wait_for(queue.get(), timeout=1.0)
+                else:
+                    price = queue.get_nowait()
+                print(f'{id=}, {queue}::Got price {price}')
+            except asyncio.TimeoutError:
+                continue
+            except (asyncio.CancelledError, asyncio.queues.QueueEmpty):
+                print(f'{id=}, {queue}:: Exiting, all done.')
+                next_event.set()
                 break
+            else:
+                yield price
+
+    async def fetch_web_data_consumer(self, id):
+        async for price in self._get_price_from_queue(self.fetch_queue, self.main_end_event, self.fetch_end_event, id):
+            await self.update_price(price)
+            await self.check_trigger(price)
+            await self.save_db_queue.put(price)
+            self.fetch_queue.task_done()
 
     # async def save_data_in_db_consumer(self, id):
     #     while True:
