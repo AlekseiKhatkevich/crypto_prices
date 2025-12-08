@@ -1,5 +1,5 @@
 import abc
-from typing import Awaitable, TYPE_CHECKING
+from typing import AsyncIterator, Awaitable, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .price import CryptoPrice
@@ -12,5 +12,5 @@ class CryptoPriceRepository(abc.ABC):
         pass
 
     @abc.abstractmethod
-    async def all(self) -> Awaitable[list['CryptoPrice'] ]:
+    async def __aiter__(self) -> AsyncIterator['CryptoPrice']:
         pass

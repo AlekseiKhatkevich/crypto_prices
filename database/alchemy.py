@@ -40,10 +40,11 @@ class Database:
                 json_deserializer=pydantic_core.from_json,
                 json_serializer=pydantic_core.to_json,
                 echo=True,
-                max_overflow=15,
+                max_overflow=10,
                 pool_pre_ping=True,
                 pool_timeout=5,
                 pool_size=5,
+                pool_use_lifo=True,
             ) | self._kwargs,
         )
         return engine

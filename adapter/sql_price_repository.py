@@ -1,10 +1,13 @@
-from typing import AsyncIterator, Awaitable
+from typing import AsyncIterator, Awaitable, TYPE_CHECKING
 
 import sqlalchemy as sa
 
 from database import CryptoPriceORM
 from database.alchemy import db
 from domain.price_db_repository import CryptoPriceRepository
+
+if TYPE_CHECKING:
+    from domain.price import CryptoPrice
 
 __all__ = (
     'SQLPriceRepository',
@@ -21,14 +24,13 @@ class SQLPriceRepository(CryptoPriceRepository):
             )
             return res.all()
 
-    async def add(self, price) -> Awaitable[CryptoPriceORM]:
+    async def add(self, price: 'CryptoPrice') -> Awaitable['CryptoPrice']:
         # orm_price = self.model.from_dto()
         async with self.db.async_session as session:
             await session.add(price)
             await session.commit()
         return price
 
-    async def __aiter__(self) -> AsyncIterator[CryptoPriceORM] :
-        all_targets = await self.all()
-        for target in all_targets:
+    async def __aiter__(self) -> AsyncIterator['CryptoPrice'] :
+        for target in await self.all():
             yield target.to_dto(target)
