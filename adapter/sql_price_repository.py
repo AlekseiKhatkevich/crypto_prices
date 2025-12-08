@@ -25,9 +25,9 @@ class SQLPriceRepository(CryptoPriceRepository):
             return res.all()
 
     async def add(self, price: 'CryptoPrice') -> Awaitable['CryptoPrice']:
-        # orm_price = self.model.from_dto()
+        orm_price = self.model.from_dto(price)
         async with self.db.async_session as session:
-            await session.add(price)
+            await session.merge(orm_price)
             await session.commit()
         return price
 

@@ -81,3 +81,16 @@ class CryptoPriceORM(ORMBase):
             is_active=price.is_active,
             ticker=price.ticker,
         )
+
+    @classmethod
+    def from_dto(cls, price: 'CryptoPrice') -> 'CryptoPriceORM':
+        return cls(
+            id=price.id,
+            standard_name=price.standard_name,
+            target=price.target,
+            movement_direction=price.movement_direction,
+            last_saved=price.last_saved,
+            is_active=price.is_active,
+            ticker=price.ticker,
+            updated_at=func.NOW(),
+        )
