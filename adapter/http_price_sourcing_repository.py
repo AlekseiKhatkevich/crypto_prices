@@ -47,8 +47,11 @@ class HTTPCryptoPriceSourcingRepository(Finalizable, CryptoPriceSourcingReposito
 
         return price
 
-    async def _finalize(self):
+    async def _finalize(self) -> None:
         await self.client.aclose()
+
+    def __call__(self, *args, **kwargs) -> 'HTTPCryptoPriceSourcingRepository':
+        return self
 
 
 repository: HTTPCryptoPriceSourcingRepository
