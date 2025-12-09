@@ -8,7 +8,9 @@ dependencies = [
     "alembic>=1.17.2",
     "httpx[http2]>=0.28.1",
     "pydantic>=2.12.5",
+    "rich>=14.2.0",
     "sqlalchemy[aiosqlite]>=2.0.44, <2.1",
+    "structlog>=25.5.0",
 ]
 
 [dependency-groups]

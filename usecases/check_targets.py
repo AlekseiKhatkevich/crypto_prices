@@ -1,10 +1,9 @@
 import asyncio
-
+from typing import AsyncGenerator, TYPE_CHECKING
+from utils.logging import log
 from adapter.http_price_sourcing_repository import repository as http_repository
 from adapter.sql_price_repository import SQLPriceRepository
 from domain.price import CryptoPrice
-
-from typing import AsyncGenerator, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from domain.price_sourcing_repository import CryptoPriceSourcingRepository
@@ -12,12 +11,10 @@ if TYPE_CHECKING:
 
 
 # DI !
-# StructLog
 #
 QUEUE_MAXSIZE = 3
 
 class CheckTargetsUseCase:
-
     def __init__(
             self,
             targets_repo:'CryptoPriceSourcingRepository' = http_repository,
@@ -43,16 +40,18 @@ class CheckTargetsUseCase:
                 _id,
                 name='send_to_tg_consumer',
         ):
-            print(f'{_id=} send_to_tg_consumer:: Sending price {price} to telegram bot.')
+            await log.ainfo(f'Sending price {price} to telegram bot.', id=_id, price=price)
             self.telegram_queue.task_done()
 
-# last. saved is None ?
     async def check_trigger(self, price: CryptoPrice) -> None:
         if ((price.movement_direction.DOWN and price.last_saved > price.target >= price.current) or
                 (price.movement_direction.UP and price.last_saved < price.target <= price.current)):
             price.is_active = False
             await self.telegram_queue.put(price)
-            print(f'check_trigger:: Condition has triggered. Target -- {price.target}, price -- {price.current}')
+            await log.ainfo(
+                f'check_trigger:: Condition has triggered.',
+                target=price.target, price=price.current, price_id=price.id
+            )
 
 
 
@@ -72,17 +71,18 @@ class CheckTargetsUseCase:
         где этот консьюмер является продьюсером мы сигнализируем об окончании работы.
         4) Завершаем работу консьюмера.
         """
+        local_log = log.bind(id=_id, name=name)
         while True:
             try:
                 if not prev_event.is_set():
                     price = await asyncio.wait_for(queue.get(), timeout=1.0)
                 else:
                     price = queue.get_nowait()
-                print(f'{_id=}, {queue}::Got price {price}')
+                await local_log.ainfo(f'Got price {price}')
             except asyncio.TimeoutError:
                 continue
             except (asyncio.CancelledError, asyncio.queues.QueueEmpty):
-                print(f'{_id=}, {name}::Exiting, all done.')
+                await local_log.ainfo('Exiting, all done.')
                 if current_event is not None:
                     current_event.set()
                 break
@@ -112,14 +112,16 @@ class CheckTargetsUseCase:
         ):
             await self.sql_repo.add(price)
             self.save_db_queue.task_done()
+            await log.ainfo(f'Saved price {price} in db.', consumer='save_data_in_db_consumer', id=_id)
 
 
     async def main_producer(self) -> None:
+        log_local = log.bind(producer='main_producer')
         async for price in self.sql_repo:
             await self.fetch_queue.put(price)
-            print(f'main_producer::Put price {price} in queue')
+            await log_local.ainfo(f'Put price {price} in queue.')
         self.main_end_event.set()
-        print(f'main_producer::Set main event. All done!')
+        await log_local.ainfo(f'Set main event. All done!')
 
     async def execute(self) -> None:
         await asyncio.gather(

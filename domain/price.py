@@ -36,12 +36,12 @@ class CryptoPrice:
     ) -> Awaitable['CryptoPrice']:
         return await sourcing_repository.fetch(self)
 
-    @property
-    def last_saved(self) -> decimal.Decimal:
+    def __post_init__(self) -> None:
         if self.last_saved is None:
             if self.movement_direction == CryptoPriceMovementDirection.DOWN:
-                return decimal.Decimal('Infinity')
+                self.last_saved = decimal.Decimal('Infinity')
             else:
-                return decimal.Decimal('-Infinity')
-        else:
-            return self.last_saved
+                self.last_saved = decimal.Decimal('-Infinity')
+
+    def __repr__(self):
+        return f'"{self.ticker.upper()}"'
