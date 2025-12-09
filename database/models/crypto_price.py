@@ -38,6 +38,7 @@ class CryptoPriceORM(ORMBase):
     )
     last_saved: Mapped[decimal.Decimal] = mapped_column(
         comment='Последняя сохраненная цена.',
+        nullable=True,
     )
     is_active: Mapped[bool] = mapped_column(
         comment='Признак активности таргета.',

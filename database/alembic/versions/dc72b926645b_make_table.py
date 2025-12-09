@@ -1,8 +1,8 @@
-"""Added price table
+"""Make table
 
-Revision ID: 3b0906e9a392
+Revision ID: dc72b926645b
 Revises: 
-Create Date: 2025-12-02 15:38:02.062754
+Create Date: 2025-12-09 13:58:40.112141
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '3b0906e9a392'
+revision: str = 'dc72b926645b'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -27,7 +27,7 @@ def upgrade() -> None:
     sa.Column('ticker', sa.String(), nullable=False, comment='Тикер.'),
     sa.Column('standard_name', sa.String(), nullable=False, comment='Стандартное название для апи получения.'),
     sa.Column('movement_direction', sa.Enum('DOWN', 'UP', name='cryptopricemovementdirection'), nullable=False, comment='Направление движения цены.'),
-    sa.Column('last_saved', sa.Numeric(), nullable=False, comment='Последняя сохраненная цена.'),
+    sa.Column('last_saved', sa.Numeric(), nullable=True, comment='Последняя сохраненная цена.'),
     sa.Column('is_active', sa.Boolean(), server_default=sa.text('1'), nullable=False, comment='Признак активности таргета.'),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False, comment='Время создания.'),
     sa.Column('updated_at', sa.DateTime(), nullable=True, comment='Время обновления.'),
