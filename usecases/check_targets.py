@@ -1,5 +1,7 @@
 import asyncio
 from typing import AsyncGenerator, TYPE_CHECKING
+
+from adapter import PriceTGRepository
 from utils.logging import log
 from adapter.http_price_sourcing_repository import repository as http_repository
 from adapter.sql_price_repository import SQLPriceRepository
@@ -8,6 +10,7 @@ from domain.price import CryptoPrice
 if TYPE_CHECKING:
     from domain.price_sourcing_repository import CryptoPriceSourcingRepository
     from domain.price_db_repository import CryptoPriceRepository
+    from domain.price_tg_repository import PriceMessangerRepository
 
 
 QUEUE_MAXSIZE = 3
@@ -17,9 +20,11 @@ class CheckTargetsUseCase:
             self,
             targets_repo:'CryptoPriceSourcingRepository' = http_repository,
             sql_repo: 'CryptoPriceRepository'=SQLPriceRepository(),
+            tg_repo: 'PriceMessangerRepository' = PriceTGRepository(),
     ) -> None:
         self.targets_repo = targets_repo
         self.sql_repo = sql_repo
+        self.tg_repo = tg_repo
 
         self.fetch_queue = asyncio.Queue(QUEUE_MAXSIZE)
         self.telegram_queue = asyncio.Queue(QUEUE_MAXSIZE)
@@ -38,6 +43,7 @@ class CheckTargetsUseCase:
                 _id,
                 name='send_to_tg_consumer',
         ):
+            await self.tg_repo.send(price)
             await log.ainfo(f'Sending price {price} to telegram bot.', id=_id, price=price)
             self.telegram_queue.task_done()
 
