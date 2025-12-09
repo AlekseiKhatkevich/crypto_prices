@@ -163,3 +163,8 @@ cython_debug/
 .idea/
 
 /crypto_price_db.db
+/_secrets.py
+
+#  telethon
+/*.session
+

@@ -10,8 +10,6 @@ if TYPE_CHECKING:
     from domain.price_db_repository import CryptoPriceRepository
 
 
-# DI !
-#
 QUEUE_MAXSIZE = 3
 
 class CheckTargetsUseCase:
@@ -52,8 +50,6 @@ class CheckTargetsUseCase:
                 f'check_trigger:: Condition has triggered.',
                 target=price.target, price=price.current, price_id=price.id
             )
-
-
 
     @staticmethod
     async def _get_price_from_queue(
