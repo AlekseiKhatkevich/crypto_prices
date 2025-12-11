@@ -49,8 +49,8 @@ class CheckTargetsUseCase:
             self.telegram_queue.task_done()
 
     async def check_trigger(self, price: CryptoPrice) -> None:
-        last_saved = cast(decimal.Decimal, price.last_saved)
-        current = cast(decimal.Decimal, price.current)
+        last_saved = price.last_saved
+        current = price.current
         target =  price.target
         if ((price.movement_direction.DOWN and last_saved > target >= current) or
                 (price.movement_direction.UP and last_saved < target <= current)):

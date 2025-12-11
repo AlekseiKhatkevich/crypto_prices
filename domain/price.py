@@ -1,7 +1,6 @@
 import dataclasses
 import decimal
 import enum
-from dataclasses import InitVar
 from typing import Awaitable, TYPE_CHECKING
 
 from utils.enums import CaseInsensitiveMixin
@@ -23,7 +22,7 @@ class CryptoPrice:
     target: decimal.Decimal
     movement_direction: CryptoPriceMovementDirection
     id: int | None = None
-    last_saved: dataclasses.InitVar[decimal.Decimal | None] = None
+    last_saved: dataclasses.InitVar[decimal.Decimal | None] = dataclasses.field(default=None)
     current:decimal.Decimal | None = None
     is_active: bool = True
 
@@ -40,11 +39,11 @@ class CryptoPrice:
     def __post_init__(self, last_saved) -> None:
         if last_saved is None:
             if self.movement_direction == CryptoPriceMovementDirection.DOWN:
-                self.last_saved = decimal.Decimal('Infinity')
+                self.last_saved: decimal.Decimal = decimal.Decimal('Infinity')
             else:
-                self.last_saved = decimal.Decimal('-Infinity')
+                self.last_saved: decimal.Decimal  = decimal.Decimal('-Infinity')
         else:
-            self.last_saved = last_saved
+            self.last_saved: decimal.Decimal  = last_saved
 
     def __repr__(self):
         return f'Price ("{self.ticker.upper()}")'
