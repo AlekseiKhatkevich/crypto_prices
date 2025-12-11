@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 class CryptoPriceRepository(abc.ABC):
     @abc.abstractmethod
-    async def add(self, price: 'CryptoPrice') -> Awaitable['CryptoPrice']:
+    async def add(self, price: 'CryptoPrice') -> 'CryptoPrice':
         pass
 
     @abc.abstractmethod

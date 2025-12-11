@@ -27,7 +27,7 @@ class CryptoPrice:
     is_active: bool = True
 
 
-    async def save_in_db(self, db_repository: 'CryptoPriceRepository', ) -> Awaitable['CryptoPrice']:
+    async def save_in_db(self, db_repository: 'CryptoPriceRepository', ) -> 'CryptoPrice':
         return await db_repository.add(self)
 
     async def fetch_current_value(

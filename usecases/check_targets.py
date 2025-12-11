@@ -51,7 +51,7 @@ class CheckTargetsUseCase:
     async def check_trigger(self, price: CryptoPrice) -> None:
         last_saved = cast(decimal.Decimal, price.last_saved)
         current = cast(decimal.Decimal, price.current)
-        target = cast(decimal.Decimal, price.target)
+        target =  price.target
         if ((price.movement_direction.DOWN and last_saved > target >= current) or
                 (price.movement_direction.UP and last_saved < target <= current)):
             price.is_active = False
