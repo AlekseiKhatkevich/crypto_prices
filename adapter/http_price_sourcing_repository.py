@@ -1,7 +1,7 @@
 import contextlib
 import decimal
 from typing import Dict
-
+from http import HTTPStatus
 import httpx
 from pydantic import RootModel
 
@@ -29,23 +29,22 @@ class HTTPCryptoPriceSourcingRepository(Finalizable, CryptoPriceSourcingReposito
         self.client = httpx.AsyncClient(
             http2=True,
             limits=httpx.Limits(max_connections=10),
-            event_hooks={'response': [self.raise_on_4xx_5xx]},
             transport=httpx.AsyncHTTPTransport(retries=2),
         )
-
-    @staticmethod
-    async def raise_on_4xx_5xx(response) -> None:
-        response.raise_for_status()
 
     async def fetch(self, price):
         response = await self.client.get(
                 self.base_url,
                 params={'ids': price.standard_name, 'vs_currencies': settings.vs_currency},
             )
-        validated = PricesResponse.model_validate(response.json())
-        current_price = validated.root[price.standard_name].root[settings.vs_currency]
-        price.current = current_price
+        if response.status_code == HTTPStatus.OK:
+            validated = PricesResponse.model_validate(response.json())
+            current_price = validated.root[price.standard_name].root[settings.vs_currency]
+            price.current = current_price
+        elif response.status_code == HTTPStatus.TOO_MANY_REQUESTS:
+            return price
 
+        response.raise_for_status()
         return price
 
     async def _finalize(self) -> None:

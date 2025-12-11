@@ -104,8 +104,9 @@ class CheckTargetsUseCase:
                 name='fetch_web_data_consumer',
         ):
             await http_repository.fetch(price)
-            await self.check_trigger(price)
-            await self.save_db_queue.put(price)
+            if price.current:
+                await self.check_trigger(price)
+                await self.save_db_queue.put(price)
             self.fetch_queue.task_done()
 
     async def save_data_in_db_consumer(self, _id: int) -> None:

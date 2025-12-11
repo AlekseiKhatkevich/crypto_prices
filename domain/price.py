@@ -25,6 +25,7 @@ class CryptoPrice:
     last_saved: dataclasses.InitVar[decimal.Decimal | None] = dataclasses.field(default=None)
     current:decimal.Decimal | None = None
     is_active: bool = True
+    # non_modified: bool = False
 
 
     async def save_in_db(self, db_repository: 'CryptoPriceRepository', ) -> 'CryptoPrice':

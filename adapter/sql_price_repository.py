@@ -20,7 +20,13 @@ class SQLPriceRepository(CryptoPriceRepository):
     async def all(self) -> list[CryptoPriceORM]:
         async with self.db.async_session as session:
             res = await session.scalars(
-                sa.select(self.model).where(self.model.is_active == sa.true())
+                sa.select(
+                    self.model
+                ).where(
+                    self.model.is_active == sa.true()
+                ).order_by(
+                    self.model.updated_at.asc().nulls_first()
+                )
             )
             return res.all()
 
