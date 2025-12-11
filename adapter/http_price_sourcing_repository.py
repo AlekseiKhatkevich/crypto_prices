@@ -1,3 +1,4 @@
+import contextlib
 import decimal
 from typing import Dict
 
@@ -48,7 +49,8 @@ class HTTPCryptoPriceSourcingRepository(Finalizable, CryptoPriceSourcingReposito
         return price
 
     async def _finalize(self) -> None:
-        await self.client.aclose()
+        with contextlib.suppress(Exception):
+            await self.client.aclose()
 
     def __call__(self, *args, **kwargs) -> 'HTTPCryptoPriceSourcingRepository':
         return self

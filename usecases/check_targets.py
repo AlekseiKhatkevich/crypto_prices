@@ -1,5 +1,6 @@
 import asyncio
-from typing import AsyncGenerator, TYPE_CHECKING
+import decimal
+from typing import AsyncGenerator, TYPE_CHECKING, cast
 
 from adapter import PriceTGRepository
 from utils.logging import log
@@ -22,7 +23,7 @@ class CheckTargetsUseCase:
             sql_repo: 'CryptoPriceRepository'=SQLPriceRepository(),
             tg_repo: 'PriceMessangerRepository' = PriceTGRepository(),
     ) -> None:
-        self.targets_repo = targets_repo
+        self.targets_repo  = targets_repo
         self.sql_repo = sql_repo
         self.tg_repo = tg_repo
 
@@ -48,8 +49,11 @@ class CheckTargetsUseCase:
             self.telegram_queue.task_done()
 
     async def check_trigger(self, price: CryptoPrice) -> None:
-        if ((price.movement_direction.DOWN and price.last_saved > price.target >= price.current) or
-                (price.movement_direction.UP and price.last_saved < price.target <= price.current)):
+        last_saved = cast(decimal.Decimal, price.last_saved)
+        current = cast(decimal.Decimal, price.current)
+        target = cast(decimal.Decimal, price.target)
+        if ((price.movement_direction.DOWN and last_saved > target >= current) or
+                (price.movement_direction.UP and last_saved < target <= current)):
             price.is_active = False
             await self.telegram_queue.put(price)
             await log.ainfo(
@@ -66,11 +70,11 @@ class CheckTargetsUseCase:
             name: str,
     ) -> AsyncGenerator[CryptoPrice, None]:
         """
-        1) С таймаутом в 1 сек мы пытаемся получить задачу из очереди пока продюсер не закончил работу.
+        1) С тайм-аутом в 1 сек мы пытаемся получить задачу из очереди пока продюсер не закончил работу.
         2) Как только продюсер закончил работу prev_event.is_set() == True, мы переходим в режим get_nowait,
         в котором мы просто берем все задачи из очереди пока они не закончатся.
         3) Задачи заканчиваются и мы устанавливаем эвент текущего контекста в True, что говорит о том что везде,
-        где этот консьюмер является продьюсером мы сигнализируем об окончании работы.
+        где этот консьюмер является продюсером мы сигнализируем об окончании работы.
         4) Завершаем работу консьюмера.
         """
         local_log = log.bind(id=_id, name=name)

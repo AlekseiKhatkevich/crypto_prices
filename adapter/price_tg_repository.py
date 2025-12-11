@@ -1,5 +1,4 @@
 import os
-from pyexpat.errors import messages
 from typing import TYPE_CHECKING
 
 from telethon import TelegramClient
