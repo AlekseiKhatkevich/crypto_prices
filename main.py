@@ -1,6 +1,7 @@
-import asyncio
+#!/usr/bin/env -S uv run --script
+import anyio
 
 from usecases.check_targets import CheckTargetsUseCase
 
 if __name__ == '__main__':
-    asyncio.run(CheckTargetsUseCase().execute())
+    anyio.run(CheckTargetsUseCase().execute)
