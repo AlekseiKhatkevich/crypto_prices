@@ -4,7 +4,7 @@ from typing import Dict
 from http import HTTPStatus
 import httpx
 from pydantic import RootModel
-
+from utils.logging import log
 from domain.price_sourcing_repository import CryptoPriceSourcingRepository
 from settings import settings
 from utils.singletone import ModuleSingletonAssigner
@@ -42,9 +42,11 @@ class HTTPCryptoPriceSourcingRepository(Finalizable, CryptoPriceSourcingReposito
             current_price = validated.root[price.standard_name].root[settings.vs_currency]
             price.current = current_price
         elif response.status_code == HTTPStatus.TOO_MANY_REQUESTS:
+            await log.awarning(f'Price "{price}" http fetch. Got 429, skipping...')
             return price
 
         response.raise_for_status()
+
         return price
 
     async def _finalize(self) -> None:

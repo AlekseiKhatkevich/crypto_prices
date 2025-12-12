@@ -167,5 +167,7 @@ cython_debug/
 
 #  telethon
 /*.session
+/*.session-journal
 
 /sqlbackups/
+

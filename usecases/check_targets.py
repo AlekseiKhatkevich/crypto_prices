@@ -1,12 +1,11 @@
 import asyncio
-import decimal
-from typing import AsyncGenerator, TYPE_CHECKING, cast
+from typing import AsyncGenerator, TYPE_CHECKING
 
 from adapter import PriceTGRepository
-from utils.logging import log
 from adapter.http_price_sourcing_repository import repository as http_repository
 from adapter.sql_price_repository import SQLPriceRepository
 from domain.price import CryptoPrice
+from utils.logging import log
 
 if TYPE_CHECKING:
     from domain.price_sourcing_repository import CryptoPriceSourcingRepository
@@ -52,8 +51,8 @@ class CheckTargetsUseCase:
         last_saved = price.last_saved
         current = price.current
         target =  price.target
-        if ((price.movement_direction.DOWN and last_saved > target >= current) or
-                (price.movement_direction.UP and last_saved < target <= current)):
+        if ((price.movement_direction.DOWN and (last_saved > target >= current)) or
+                (price.movement_direction.UP and (last_saved < target <= current))):
             price.is_active = False
             await self.telegram_queue.put(price)
             await log.ainfo(
@@ -118,8 +117,8 @@ class CheckTargetsUseCase:
                 name='save_data_in_db_consumer',
         ):
             await self.sql_repo.add(price)
-            self.save_db_queue.task_done()
             await log.ainfo(f'Saved price {price} in db.', consumer='save_data_in_db_consumer', id=_id)
+            self.save_db_queue.task_done()
 
 
     async def main_producer(self) -> None:
@@ -135,5 +134,5 @@ class CheckTargetsUseCase:
             self.main_producer(),
             *[self.fetch_web_data_consumer(_id) for _id in range(QUEUE_MAXSIZE)],
             *[self.save_data_in_db_consumer(_id) for _id in range(QUEUE_MAXSIZE)],
-            *[self.send_to_tg_consumer(_id) for _id in range(QUEUE_MAXSIZE)],
+            *[self.send_to_tg_consumer(_id) for _id in range(1)],
         )
