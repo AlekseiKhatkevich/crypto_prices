@@ -1,12 +1,14 @@
 import contextlib
 import decimal
-from typing import Dict
 from http import HTTPStatus
+from typing import Dict
+
 import httpx
 from pydantic import RootModel
-from utils.logging import log
+
 from domain.price_sourcing_repository import CryptoPriceSourcingRepository
 from settings import settings
+from utils.logging import log
 from utils.singletone import ModuleSingletonAssigner
 from utils.weakref import Finalizable
 
@@ -31,21 +33,29 @@ class HTTPCryptoPriceSourcingRepository(Finalizable, CryptoPriceSourcingReposito
             limits=httpx.Limits(max_connections=10),
             transport=httpx.AsyncHTTPTransport(retries=2),
         )
+        self._price_cache = {}
 
     async def fetch(self, price):
-        response = await self.client.get(
-                self.base_url,
-                params={'ids': price.standard_name, 'vs_currencies': settings.vs_currency},
-            )
-        if response.status_code == HTTPStatus.OK:
-            validated = PricesResponse.model_validate(response.json())
-            current_price = validated.root[price.standard_name].root[settings.vs_currency]
-            price.current = current_price
-        elif response.status_code == HTTPStatus.TOO_MANY_REQUESTS:
-            await log.awarning(f'Price "{price}" http fetch. Got 429, skipping...')
-            return price
+        try:
+            current_price = self._price_cache[price.standard_name]
+        except KeyError:
+            response = await self.client.get(
+                    self.base_url,
+                    params={'ids': price.standard_name, 'vs_currencies': settings.vs_currency},
+                )
+            if response.status_code == HTTPStatus.OK:
+                validated = PricesResponse.model_validate(response.json())
+                current_price = validated.root[price.standard_name].root[settings.vs_currency]
+                price.current = current_price
+                self._price_cache[price.standard_name] = price.current
+            elif response.status_code == HTTPStatus.TOO_MANY_REQUESTS:
+                await log.awarning(f'Price "{price}" http fetch. Got 429, skipping...')
+                return price
 
-        response.raise_for_status()
+            response.raise_for_status()
+        else:
+            await log.ainfo(f'Got price "{price}" from cache. Current price is {current_price}')
+            price.current = current_price
 
         return price
 

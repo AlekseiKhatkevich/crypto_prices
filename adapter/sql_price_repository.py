@@ -1,4 +1,4 @@
-from typing import AsyncIterator, Awaitable, TYPE_CHECKING
+from typing import AsyncIterator, TYPE_CHECKING
 
 import sqlalchemy as sa
 
@@ -25,7 +25,8 @@ class SQLPriceRepository(CryptoPriceRepository):
                 ).where(
                     self.model.is_active == sa.true()
                 ).order_by(
-                    self.model.updated_at.asc().nulls_first()
+                    self.model.updated_at.asc().nulls_first(),
+                    sa.func.abs(self.model.target - self.model.last_saved).asc(),
                 )
             )
             return res.all()
