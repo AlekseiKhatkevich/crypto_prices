@@ -31,4 +31,4 @@ ENTRYPOINT []
 
 USER nonroot
 
-CMD ["uv", "run",  "main.py"]
+CMD ["uv", "run", "main.py"]
