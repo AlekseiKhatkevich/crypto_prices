@@ -8,6 +8,7 @@ ENV UV_NO_DEV=1
 ENV UV_COMPILE_BYTECODE=1
 ENV UV_LINK_MODE=copy
 ENV UV_TOOL_BIN_DIR=/usr/local/bin
+ENV UV_PYTHON_DOWNLOADS=never
 
 RUN groupadd --system --gid 999 nonroot \
  && useradd --system --gid 999 --uid 999 --create-home nonroot
