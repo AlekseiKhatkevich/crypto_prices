@@ -1,7 +1,7 @@
 import datetime
 import decimal
 
-from sqlalchemy import CheckConstraint, FetchedValue, Index, func, text, true
+from sqlalchemy import CheckConstraint, FetchedValue, Index, func, text, true, Computed
 from sqlalchemy.orm import Mapped, mapped_column
 
 from database.models.base import ORMBase
@@ -54,6 +54,10 @@ class CryptoPriceORM(ORMBase):
         onupdate=func.Now(),
         comment='Время обновления.',
         server_onupdate=FetchedValue(for_update=True),
+    )
+    price_diff: Mapped[decimal.Decimal | None] = mapped_column(
+        Computed(text('ROUND(ABS(last_saved - target) / ((target + last_saved) / 2.0) * 100, 5)')),
+        comment='Симметричный процент таргета и текущей цены',
     )
 
     __table_args__ = (

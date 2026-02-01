@@ -26,7 +26,7 @@ class SQLPriceRepository(CryptoPriceRepository):
                     self.model.is_active == sa.true()
                 ).order_by(
                     self.model.updated_at.asc().nulls_first(),
-                    sa.func.abs(self.model.target - self.model.last_saved).asc(),
+                    self.model.price_diff.asc(),
                 )
             )
             return res.all()
