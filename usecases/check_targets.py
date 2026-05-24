@@ -53,6 +53,8 @@ class CheckTargetsUseCase:
         target =  price.target
         if ((price.movement_direction.DOWN and (last_saved > target >= current)) or
                 (price.movement_direction.UP and (last_saved < target <= current))):
+        # if ((price.movement_direction.DOWN and (target >= current)) or
+        #         (price.movement_direction.UP and (target <= current))):
             price.is_active = False
             await self.telegram_queue.put(price)
             await log.ainfo(
